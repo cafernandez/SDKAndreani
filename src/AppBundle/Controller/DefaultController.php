@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Andreani\Andreani;
 use Andreani\Requests\CotizarEnvio;
+use Andreani\Requests\ConfirmarCompra;
 
 class DefaultController extends Controller {
 
@@ -40,6 +41,36 @@ class DefaultController extends Controller {
             echo "La cotización funcionó bien y la tarifa es $tarifa";
         } else {
             echo "La cotización falló, el mensaje de error es el siguiente";
+            var_dump($response->getMessage());
+        }
+        die;
+    }
+    
+    
+    /**
+     * @Route("/confirmar-compra", name="confirmar-compra")
+     */
+    public function confirmarCompraAction(Request $request) {
+        $compra = new ConfirmarCompra();
+        $compra
+                //->setCalle('Santo Domingo')
+                //->setCategoriaDistancia($categoriaDistancia)
+                //->setCategoriaFacturacion($categoriaFacturacion)
+                //->setCategoriaPeso($categoriaPeso)
+                //->setCodigoDeSucursal($codigoDeSucursal)
+                //->setCodigoPostal(1292)
+                ->setDatosTransaccion(400006709, 'ID123', 132, 1500);
+                $compra->setDatosEnvio(100, 100, 1000, null, null, null, 'Campera', 'Campera');
+                $compra->setDatosDestino('Buenos Aires', 'CABA', 1292, 'Santo Domingo', 3220);
+                $compra->setDatosDestinatario('Juana Github', '', 'DNI', '1122233', 'juana@githu.com', '11222333', '44445555');
+
+        $andreani = new Andreani('eCommerce_Integra', 'passw0rd', 'test');
+        $response = $andreani->call($compra);
+        if ($response->isValid()) {
+            $numeroAndreani = $response->getMessage()->ConfirmarCompraResult->NumeroAndreani;
+            echo "La compra funcionó bien y su número de seguimiento es $numeroAndreani";
+        } else {
+            echo "La compra falló, el mensaje de error es el siguiente";
             var_dump($response->getMessage());
         }
         die;
