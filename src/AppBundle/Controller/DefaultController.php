@@ -8,6 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Andreani\Andreani;
 use Andreani\Requests\CotizarEnvio;
 use Andreani\Requests\ConfirmarCompra;
+use Andreani\Requests\ConsultarSucursales;
 
 class DefaultController extends Controller {
 
@@ -45,8 +46,7 @@ class DefaultController extends Controller {
         }
         die;
     }
-    
-    
+
     /**
      * @Route("/confirmar-compra", name="confirmar-compra")
      */
@@ -60,9 +60,9 @@ class DefaultController extends Controller {
                 //->setCodigoDeSucursal($codigoDeSucursal)
                 //->setCodigoPostal(1292)
                 ->setDatosTransaccion(400006709, 'ID123', 132, 1500);
-                $compra->setDatosEnvio(100, 100, 1000, null, null, null, 'Campera', 'Campera');
-                $compra->setDatosDestino('Buenos Aires', 'CABA', 1292, 'Santo Domingo', 3220);
-                $compra->setDatosDestinatario('Juana Github', '', 'DNI', '1122233', 'juana@githu.com', '11222333', '44445555');
+        $compra->setDatosEnvio(100, 100, 1000, null, null, null, 'Campera', 'Campera');
+        $compra->setDatosDestino('Buenos Aires', 'CABA', 1292, 'Santo Domingo', 3220);
+        $compra->setDatosDestinatario('Juana Github', '', 'DNI', '1122233', 'juana@githu.com', '11222333', '44445555');
 
         $andreani = new Andreani('eCommerce_Integra', 'passw0rd', 'test');
         $response = $andreani->call($compra);
@@ -71,6 +71,30 @@ class DefaultController extends Controller {
             echo "La compra funcionó bien y su número de seguimiento es $numeroAndreani";
         } else {
             echo "La compra falló, el mensaje de error es el siguiente";
+            var_dump($response->getMessage());
+        }
+        die;
+    }
+
+    /**
+     * @Route("/sucursales", name="sucursales")
+     */
+    public function consultarSucursalesAction(Request $request) {
+        $sucursales = new ConsultarSucursales();
+
+        $sucursales
+                ->setCodigoPostal('1292');
+//                ->setLocalidad('C.A.B.A.')
+//                ->setProvincia('Buenos Aires');
+        
+        $andreani = new Andreani('eCommerce_Integra', 'passw0rd', 'test');
+        $response = $andreani->call($sucursales);
+        if ($response->isValid()) {
+            $sucursalesResponse = $response->getMessage()->ConsultarSucursalesResult->ResultadoConsultarSucursales;
+            echo "La consulta de sucursales funcionó bien y sus sucursales son: ";
+            var_dump($sucursalesResponse);
+        } else {
+            echo "La consulta de sucursales falló, el mensaje de error es el siguiente";
             var_dump($response->getMessage());
         }
         die;
