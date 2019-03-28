@@ -9,9 +9,10 @@ use Andreani\Andreani;
 use Andreani\Requests\CotizarEnvio;
 use Andreani\Requests\ConfirmarCompra;
 use Andreani\Requests\ConsultarSucursales;
+use Andreani\Requests\ImpresionDeConstancia;
 
 class DefaultController extends Controller {
-
+    
     /**
      * @Route("/", name="homepage")
      */
@@ -95,6 +96,53 @@ class DefaultController extends Controller {
             var_dump($sucursalesResponse);
         } else {
             echo "La consulta de sucursales falló, el mensaje de error es el siguiente";
+            var_dump($response->getMessage());
+        }
+        die;
+    }
+    
+    
+    /**
+     * @Route("/imprimir", name="imprimir-constancia")
+     */
+    public function imprimirConstanciaAction(Request $request) {
+        $imprimir = new ImpresionDeConstancia();
+
+        $numeroAndreani = $this->getNumeroAndreani();
+        sleep ( 3 ); //El alta de envio es asincronica. Para su impresión, se debe esperar
+        
+        $imprimir->setNumeroDeEnvio($numeroAndreani);
+        
+        $andreani = new Andreani('eCommerce_Integra', 'passw0rd', 'test');
+        $response = $andreani->call($imprimir);
+        if ($response->isValid()) {
+            $impresion = $response->getMessage()->ImprimirConstanciaResult->ResultadoImprimirConstancia->PdfLinkFile;
+            echo "La impresion de constancia funcionó bien y su constancia se encuentra en: ";
+            var_dump($impresion);
+        } else {
+            echo "La impresion de constancia falló, el mensaje de error es el siguiente";
+            var_dump($response->getMessage());
+        }
+        die;
+    }
+    
+    
+    
+    protected function getNumeroAndreani(){
+        $compra = new ConfirmarCompra();
+        $compra
+                ->setDatosTransaccion(400006709, 'ID123', 132, 1500);
+        $compra->setDatosEnvio(100, 100, 1000, null, null, null, 'Campera', 'Campera');
+        $compra->setDatosDestino('Buenos Aires', 'CABA', 1292, 'Santo Domingo', 3220);
+        $compra->setDatosDestinatario('Juana Github', '', 'DNI', '1122233', 'juana@githu.com', '11222333', '44445555');
+
+        $andreani = new Andreani('eCommerce_Integra', 'passw0rd', 'test');
+        $response = $andreani->call($compra);
+        if ($response->isValid()) {
+            $numeroAndreani = $response->getMessage()->ConfirmarCompraResult->NumeroAndreani;
+            return $numeroAndreani;
+        } else {
+            echo "La compra falló, el mensaje de error es el siguiente";
             var_dump($response->getMessage());
         }
         die;
